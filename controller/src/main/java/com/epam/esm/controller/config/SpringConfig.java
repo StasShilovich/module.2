@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @EnableWebMvc
@@ -22,7 +24,7 @@ public class SpringConfig implements EnvironmentAware {
     }
 
     @Bean
-    public BasicDataSource mysqlDataSource() {
+    public BasicDataSource dataSource() {
         BasicDataSource dataSource = new BasicDataSource();
         dataSource.setDriverClassName(environment.getProperty("datasource.driverClassName"));
         dataSource.setUrl(environment.getProperty("datasource.url"));
@@ -34,7 +36,12 @@ public class SpringConfig implements EnvironmentAware {
     }
 
     @Bean
-    JdbcTemplate jdbcTemplate(BasicDataSource dataSource) {
+    public JdbcTemplate jdbcTemplate(BasicDataSource dataSource) {
         return new JdbcTemplate(dataSource);
+    }
+
+    @Bean
+    public PlatformTransactionManager transactionManager(BasicDataSource dataSource) {
+        return new DataSourceTransactionManager(dataSource);
     }
 }
