@@ -24,8 +24,13 @@ public class RestExceptionHandler {
     }
 
     @ExceptionHandler(NotExistEntityException.class)
-    private ResponseEntity<String> handleRuntimeException(NotExistEntityException exception) {
+    private ResponseEntity<String> handleNotExistException(NotExistEntityException exception) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getLocalizedMessage());
+    }
+
+    @ExceptionHandler(UnsupportedOperationException.class)
+    private ResponseEntity<String> handleUnsupportedException(UnsupportedOperationException exception) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(exception.getLocalizedMessage());
     }
 
     @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})

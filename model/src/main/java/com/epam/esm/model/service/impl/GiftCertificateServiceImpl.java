@@ -84,46 +84,42 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
-    public List<CertificateDTO> findByTag(String tagName) throws ServiceException {
+    public List<CertificateDTO> searchByParameter(String tagName, String part) throws ServiceException, UnsupportedOperationException {
         try {
-            List<GiftCertificate> byTag = certificateDao.findByTag(tagName);
-            return byTag.stream().map(dtoMapper::toDTO).collect(Collectors.toList());
+            if (tagName != null && part != null || tagName == null && part == null) {
+                throw new UnsupportedOperationException("Not supported yet!");
+            }
+            List<GiftCertificate> result;
+            if (tagName == null) {
+                result = certificateDao.searchByNameOrDesc(part);
+            } else {
+                result = certificateDao.findByTag(tagName);
+            }
+            return result.stream().map(dtoMapper::toDTO).collect(Collectors.toList());
         } catch (DaoException e) {
-            logger.error("Find by tag service exception", e);
-            throw new ServiceException("Find by tag service exception", e);
+            logger.error("Search by parameter exception", e);
+            throw new ServiceException("Search by parameter exception", e);
         }
     }
 
     @Override
-    public List<CertificateDTO> searchByNameOrDesc(String part) throws ServiceException {
+    public List<CertificateDTO> sortByParameter(String parameter, SortType sortType) throws ServiceException, UnsupportedOperationException {
         try {
-            List<GiftCertificate> certificates = certificateDao.searchByNameOrDesc(part);
+            List<GiftCertificate> certificates;
+            if (sortType == null) {
+                sortType = SortType.ASC;
+            }
+            if (parameter != null && parameter.equals("name")) {
+                certificates = certificateDao.sortByName(sortType);
+            } else if (parameter != null && parameter.equals("date")) {
+                certificates = certificateDao.sortByDate(sortType);
+            } else {
+                certificates = certificateDao.sortByName(sortType);
+            }
             return certificates.stream().map(dtoMapper::toDTO).collect(Collectors.toList());
         } catch (DaoException e) {
-            logger.error("Search by name or description exception", e);
-            throw new ServiceException("Search by name or description exception", e);
-        }
-    }
-
-    @Override
-    public List<CertificateDTO> sortByName(SortType sortType) throws ServiceException {
-        try {
-            List<GiftCertificate> certificates = certificateDao.sortByName(sortType);
-            return certificates.stream().map(dtoMapper::toDTO).collect(Collectors.toList());
-        } catch (DaoException e) {
-            logger.error("Sort by name exception", e);
-            throw new ServiceException("Sort by name exception", e);
-        }
-    }
-
-    @Override
-    public List<CertificateDTO> sortByDate(SortType sortType) throws ServiceException {
-        try {
-            List<GiftCertificate> certificates = certificateDao.sortByDate(sortType);
-            return certificates.stream().map(dtoMapper::toDTO).collect(Collectors.toList());
-        } catch (DaoException e) {
-            logger.error("Sort by date exception", e);
-            throw new ServiceException("Sort by date exception", e);
+            logger.error("Sort by parameter exception", e);
+            throw new ServiceException("Sort by parameter exception", e);
         }
     }
 }

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.ws.rs.QueryParam;
 import java.util.List;
 
 /**
@@ -75,60 +76,41 @@ public class GiftCertificateController {
      * @throws ServiceException the service exception
      */
     @DeleteMapping("/certificate/{id}")
-    public ResponseEntity<String> delete(@PathVariable(name = "id") Long id) throws ServiceException, NotExistEntityException {
+    public ResponseEntity<String> delete(@PathVariable(name = "id") Long id)
+            throws ServiceException, NotExistEntityException {
         certificateService.delete(id);
         return ResponseEntity.ok("Delete successful!");
     }
 
     /**
-     * Find certificate by tag name.
+     * Search by tag name or description part
      *
-     * @param tagName the tag name
-     * @return the response entity
-     * @throws ServiceException the service exception
+     * @param tagName
+     * @param part
+     * @return
+     * @throws ServiceException
      */
-    @GetMapping("/certificates/search/{tag-name}")
-    public ResponseEntity<List<CertificateDTO>> findByTag(@PathVariable(name = "tag-name") String tagName)
+    @GetMapping("/certificates/search")
+    public ResponseEntity<List<CertificateDTO>> searchByParameter
+    (@QueryParam("tagName") String tagName, @QueryParam("part") String part)
             throws ServiceException {
-        List<CertificateDTO> certificates = certificateService.findByTag(tagName);
+        List<CertificateDTO> certificates = certificateService.searchByParameter(tagName, part);
         return ResponseEntity.ok(certificates);
     }
 
     /**
-     * Search certificate by name or description part.
+     * Sort by date or name ASC/DESC
      *
-     * @param part the part
-     * @return the response entity
-     * @throws ServiceException the service exception
+     * @param by
+     * @param type
+     * @return
+     * @throws ServiceException
      */
-    @GetMapping("/certificates/search/{part}")
-    public ResponseEntity<List<CertificateDTO>> searchByNameOrDesc(@PathVariable(name = "part") String part)
+    @GetMapping("/certificates/sort")
+    public ResponseEntity<List<CertificateDTO>> sortByParameter
+    (@QueryParam("by") String by, @QueryParam("type") SortType type)
             throws ServiceException {
-        List<CertificateDTO> certificates = certificateService.searchByNameOrDesc(part);
-        return ResponseEntity.ok(certificates);
-    }
-
-    /**
-     * Sort certificates by name.
-     *
-     * @return the response entity
-     * @throws ServiceException the service exception
-     */
-    @GetMapping("/certificates/sort/name/{sort}")
-    public ResponseEntity<List<CertificateDTO>> sortByName(@PathVariable(name = "sort") SortType sortType) throws ServiceException {
-        List<CertificateDTO> certificates = certificateService.sortByName(sortType);
-        return ResponseEntity.ok(certificates);
-    }
-
-    /**
-     * Sort certificates by date.
-     *
-     * @return the response entity
-     * @throws ServiceException the service exception
-     */
-    @GetMapping("/certificates/sort/date/{sort}")
-    public ResponseEntity<List<CertificateDTO>> sortByDate(@PathVariable(name = "sort") SortType sortType) throws ServiceException {
-        List<CertificateDTO> certificates = certificateService.sortByDate(sortType);
+        List<CertificateDTO> certificates = certificateService.sortByParameter(by, type);
         return ResponseEntity.ok(certificates);
     }
 }
