@@ -6,7 +6,6 @@ import com.epam.esm.model.dao.exception.DaoException;
 import com.epam.esm.model.service.dto.CertificateDTO;
 
 import java.util.List;
-import java.util.Map;
 
 public interface GiftCertificateDao {
 

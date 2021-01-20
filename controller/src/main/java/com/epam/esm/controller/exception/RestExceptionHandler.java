@@ -1,5 +1,6 @@
 package com.epam.esm.controller.exception;
 
+import com.epam.esm.model.dao.exception.NotExistEntityException;
 import com.epam.esm.model.service.exception.ServiceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +23,15 @@ public class RestExceptionHandler {
         return ResponseEntity.status(status).body(errorResponse);
     }
 
+    @ExceptionHandler(NotExistEntityException.class)
+    private ResponseEntity<String> handleRuntimeException(NotExistEntityException exception) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getLocalizedMessage());
+    }
+
     @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
     private ResponseEntity<String> handleRuntimeException(RuntimeException exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception.getLocalizedMessage());
     }
+
+
 }

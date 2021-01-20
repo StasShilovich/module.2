@@ -1,7 +1,7 @@
 package com.epam.esm.model.service.converter.impl;
 
 import com.epam.esm.model.dao.entity.GiftCertificate;
-import com.epam.esm.model.service.converter.Converter;
+import com.epam.esm.model.service.converter.DTOMapper;
 import com.epam.esm.model.service.dto.CertificateDTO;
 import org.springframework.stereotype.Component;
 
@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Component
-public class CertificateConverter implements Converter<CertificateDTO, GiftCertificate> {
+public class GiftCertificateDTOMapper implements DTOMapper<CertificateDTO, GiftCertificate> {
     private final static String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.s";
 
     @Override

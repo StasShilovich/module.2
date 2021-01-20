@@ -4,7 +4,7 @@ import com.epam.esm.model.dao.TagDao;
 import com.epam.esm.model.dao.entity.Tag;
 import com.epam.esm.model.dao.exception.DaoException;
 import com.epam.esm.model.service.TagService;
-import com.epam.esm.model.service.converter.impl.TagConverter;
+import com.epam.esm.model.service.converter.impl.TagDTOMapper;
 import com.epam.esm.model.service.dto.TagDTO;
 import com.epam.esm.model.service.exception.ServiceException;
 
@@ -25,18 +25,18 @@ import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 @RunWith(JUnitPlatform.class)
-class TagServiceImplTest {
+public class TagServiceImplTest {
 
     @Mock
     TagDao tagDao;
-    TagConverter tagConverter;
+    TagDTOMapper tagConverter;
     TagService tagService;
     Tag correctTag;
     TagDTO correctTagDTO;
 
     @BeforeEach
     public void setUp() {
-        tagConverter = new TagConverter();
+        tagConverter = new TagDTOMapper();
         tagService = new TagServiceImpl(tagDao, tagConverter);
         correctTag = new Tag(1L, "name");
         correctTagDTO = new TagDTO(1L, "name");
@@ -81,20 +81,6 @@ class TagServiceImplTest {
     void testAddException() throws DaoException {
         lenient().when(tagDao.create(any(Tag.class))).thenThrow(DaoException.class);
         assertThrows(ServiceException.class, () -> tagService.add(correctTagDTO));
-    }
-
-    @Test
-    void testDeletePositive() throws DaoException, ServiceException {
-        lenient().when(tagDao.delete(anyLong())).thenReturn(1L);
-        long actual = tagService.delete(1L);
-        assertEquals(actual, 1L);
-    }
-
-    @Test
-    void testDeleteNegative() throws DaoException, ServiceException {
-        lenient().when(tagDao.delete(anyLong())).thenReturn(1L);
-        long actual = tagService.delete(1L);
-        assertNotEquals(actual, 2L);
     }
 
     @Test

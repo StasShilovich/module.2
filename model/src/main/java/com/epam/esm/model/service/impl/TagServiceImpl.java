@@ -3,13 +3,12 @@ package com.epam.esm.model.service.impl;
 import com.epam.esm.model.dao.TagDao;
 import com.epam.esm.model.dao.entity.Tag;
 import com.epam.esm.model.dao.exception.DaoException;
-import com.epam.esm.model.dao.impl.TagDaoImpl;
+import com.epam.esm.model.dao.exception.NotExistEntityException;
 import com.epam.esm.model.service.TagService;
-import com.epam.esm.model.service.converter.impl.TagConverter;
+import com.epam.esm.model.service.converter.impl.TagDTOMapper;
 import com.epam.esm.model.service.dto.TagDTO;
 import com.epam.esm.model.service.exception.ServiceException;
 import org.apache.log4j.Logger;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,17 +17,17 @@ public class TagServiceImpl implements TagService {
 
     private final static Logger logger = Logger.getLogger(TagServiceImpl.class);
     private final TagDao tagDao;
-    private final TagConverter tagConverter;
+    private final TagDTOMapper dtoMapper;
 
-    public TagServiceImpl(TagDao tagDao, TagConverter tagConverter) {
+    public TagServiceImpl(TagDao tagDao, TagDTOMapper dtoMapper) {
         this.tagDao = tagDao;
-        this.tagConverter = tagConverter;
+        this.dtoMapper = dtoMapper;
     }
 
     public TagDTO find(Long id) throws ServiceException {
         try {
             Tag tag = tagDao.read(id);
-            TagDTO tagDTO = tagConverter.toDTO(tag);
+            TagDTO tagDTO = dtoMapper.toDTO(tag);
             return tagDTO;
         } catch (DaoException e) {
             logger.error("Find tag service exception", e);
@@ -40,9 +39,9 @@ public class TagServiceImpl implements TagService {
     @Transactional
     public TagDTO add(TagDTO tagDTO) throws ServiceException {
         try {
-            Tag tag = tagConverter.fromDTO(tagDTO);
+            Tag tag = dtoMapper.fromDTO(tagDTO);
             Tag tagDao = this.tagDao.create(tag);
-            return tagConverter.toDTO(tagDao);
+            return dtoMapper.toDTO(tagDao);
         } catch (DaoException e) {
             logger.error("Add tag service exception", e);
             throw new ServiceException("Add tag service exception", e);
@@ -51,10 +50,12 @@ public class TagServiceImpl implements TagService {
 
     @Override
     @Transactional
-    public long delete(Long id) throws ServiceException {
+    public void delete(Long id) throws ServiceException, NotExistEntityException {
         try {
-            long isDelete = tagDao.delete(id);
-            return isDelete;
+            long deletedId = tagDao.delete(id);
+            if (deletedId == -1L) {
+                throw new NotExistEntityException("Not exist entity with id " + id);
+            }
         } catch (DaoException e) {
             logger.error("Delete tag service exception", e);
             throw new ServiceException("Delete tag service exception", e);

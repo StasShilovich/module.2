@@ -1,6 +1,7 @@
 package com.epam.esm.model.service;
 
 import com.epam.esm.model.dao.entity.SortType;
+import com.epam.esm.model.dao.exception.NotExistEntityException;
 import com.epam.esm.model.service.dto.CertificateDTO;
 import com.epam.esm.model.service.exception.ServiceException;
 
@@ -14,7 +15,7 @@ public interface GiftCertificateService {
 
     CertificateDTO update(CertificateDTO certificateDTO) throws ServiceException;
 
-    long delete(Long id) throws ServiceException;
+    void delete(Long id) throws ServiceException, NotExistEntityException;
 
     List<CertificateDTO> findByTag(String tagName) throws ServiceException;
 

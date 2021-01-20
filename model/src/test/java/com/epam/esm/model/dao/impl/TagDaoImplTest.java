@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 @RunWith(JUnitPlatform.class)
-class TagDaoImplTest {
+public class TagDaoImplTest {
 
     JdbcTemplate jdbcTemplate;
     DataSource dataSource;

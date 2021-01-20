@@ -4,8 +4,9 @@ import com.epam.esm.model.dao.GiftCertificateDao;
 import com.epam.esm.model.dao.entity.GiftCertificate;
 import com.epam.esm.model.dao.entity.SortType;
 import com.epam.esm.model.dao.exception.DaoException;
+import com.epam.esm.model.dao.exception.NotExistEntityException;
 import com.epam.esm.model.service.GiftCertificateService;
-import com.epam.esm.model.service.converter.impl.CertificateConverter;
+import com.epam.esm.model.service.converter.impl.GiftCertificateDTOMapper;
 import com.epam.esm.model.service.dto.CertificateDTO;
 import com.epam.esm.model.service.exception.ServiceException;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,18 +32,18 @@ import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 @RunWith(JUnitPlatform.class)
-class GiftCertificateServiceImplTest {
+public class GiftCertificateServiceImplTest {
 
     @Mock
     GiftCertificateDao dao;
-    CertificateConverter converter;
+    GiftCertificateDTOMapper converter;
     GiftCertificateService service;
     GiftCertificate certificate;
     CertificateDTO certificateDTO;
 
     @BeforeEach
     public void setUp() {
-        converter = new CertificateConverter();
+        converter = new GiftCertificateDTOMapper();
         service = new GiftCertificateServiceImpl(dao, converter);
         certificate = new GiftCertificate(1L, "name", "description", new BigDecimal("20"),
                 5, LocalDateTime.parse("2021-01-14T13:10:00"), LocalDateTime.parse("2022-01-14T13:10:00"));
@@ -114,30 +115,17 @@ class GiftCertificateServiceImplTest {
     }
 
     @Test
-    void testDeletePositive() throws DaoException, ServiceException {
-        lenient().when(dao.delete(anyLong())).thenReturn(1L);
-        long actual = service.delete(1L);
-        assertEquals(actual, 1L);
-    }
-
-    @Test
-    void testDeleteNegative() throws DaoException, ServiceException {
-        lenient().when(dao.delete(anyLong())).thenReturn(1L);
-        long actual = service.delete(1L);
-        assertNotEquals(actual, 2L);
-    }
-
-    @Test
     void testDeleteException() throws DaoException {
         lenient().when(dao.delete(anyLong())).thenThrow(DaoException.class);
         assertThrows(ServiceException.class, () -> service.delete(1L));
     }
 
+
     @Test
     void testFindByTagPositive() throws DaoException, ServiceException {
         lenient().when(dao.findByTag(anyString())).thenReturn(new ArrayList<>());
         List<CertificateDTO> actual = service.findByTag("tagName");
-        assertEquals(actual, new ArrayList<>());
+        assertEquals(actual.size(), new ArrayList<>().size());
     }
 
     @Test
@@ -146,7 +134,7 @@ class GiftCertificateServiceImplTest {
         list.add(certificate);
         lenient().when(dao.findByTag(anyString())).thenReturn(list);
         List<CertificateDTO> actual = service.findByTag("tagName");
-        assertNotEquals(actual, new ArrayList<>());
+        assertNotEquals(actual.size(), new ArrayList<>().size());
     }
 
     @Test
@@ -159,7 +147,7 @@ class GiftCertificateServiceImplTest {
     void testSearchByNameOrDescPositive() throws DaoException, ServiceException {
         lenient().when(dao.searchByNameOrDesc(anyString())).thenReturn(new ArrayList<>());
         List<CertificateDTO> actual = service.searchByNameOrDesc("part");
-        assertEquals(actual, new ArrayList<>());
+        assertEquals(actual.size(), new ArrayList<>().size());
     }
 
     @Test
@@ -168,7 +156,7 @@ class GiftCertificateServiceImplTest {
         list.add(certificate);
         lenient().when(dao.searchByNameOrDesc(anyString())).thenReturn(list);
         List<CertificateDTO> actual = service.searchByNameOrDesc("part");
-        assertNotEquals(actual, new ArrayList<>());
+        assertNotEquals(actual.size(), new ArrayList<>().size());
     }
 
     @Test
@@ -181,7 +169,7 @@ class GiftCertificateServiceImplTest {
     void testSortByNamePositive() throws DaoException, ServiceException {
         lenient().when(dao.sortByName(any(SortType.class))).thenReturn(new ArrayList<>());
         List<CertificateDTO> actual = service.sortByName(SortType.ASC);
-        assertEquals(actual, new ArrayList<>());
+        assertEquals(actual.size(), new ArrayList<>().size());
     }
 
     @Test
@@ -190,7 +178,7 @@ class GiftCertificateServiceImplTest {
         list.add(certificate);
         lenient().when(dao.sortByName(any(SortType.class))).thenReturn(list);
         List<CertificateDTO> actual = service.sortByName(SortType.ASC);
-        assertNotEquals(actual, new ArrayList<>());
+        assertNotEquals(actual.size(), new ArrayList<>().size());
     }
 
     @Test
@@ -203,7 +191,7 @@ class GiftCertificateServiceImplTest {
     void testSortByDatePositive() throws DaoException, ServiceException {
         lenient().when(dao.sortByDate(any(SortType.class))).thenReturn(new ArrayList<>());
         List<CertificateDTO> actual = service.sortByDate(SortType.ASC);
-        assertEquals(actual, new ArrayList<>());
+        assertEquals(actual.size(), new ArrayList<>().size());
     }
 
     @Test
@@ -212,7 +200,7 @@ class GiftCertificateServiceImplTest {
         list.add(certificate);
         lenient().when(dao.sortByDate(any(SortType.class))).thenReturn(list);
         List<CertificateDTO> actual = service.sortByDate(SortType.ASC);
-        assertNotEquals(actual, new ArrayList<>());
+        assertNotEquals(actual.size(), new ArrayList<>().size());
     }
 
     @Test

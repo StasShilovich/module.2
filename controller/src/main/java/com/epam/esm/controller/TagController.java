@@ -1,6 +1,6 @@
 package com.epam.esm.controller;
 
-import com.epam.esm.model.dao.TagDao;
+import com.epam.esm.model.dao.exception.NotExistEntityException;
 import com.epam.esm.model.service.TagService;
 import com.epam.esm.model.service.dto.TagDTO;
 import com.epam.esm.model.service.exception.ServiceException;
@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
  * Tag RestAPI.
  */
 @RestController
-@RequestMapping("/tag")
 public class TagController {
 
     private TagService tagService;
@@ -27,7 +26,7 @@ public class TagController {
      * @return the response entity
      * @throws ServiceException the service exception
      */
-    @GetMapping("/{id}")
+    @GetMapping("/tag/{id}")
     public ResponseEntity<TagDTO> find(@PathVariable(name = "id") Long id) throws ServiceException {
         TagDTO tag = tagService.find(id);
         return ResponseEntity.ok(tag);
@@ -40,7 +39,7 @@ public class TagController {
      * @return the response entity
      * @throws ServiceException the service exception
      */
-    @PostMapping(value = "/", consumes = "application/json")
+    @PostMapping(value = "/tag", consumes = "application/json")
     public ResponseEntity<TagDTO> add(@RequestBody String tagName) throws ServiceException {
         TagDTO tag = new TagDTO();
         tag.setName(tagName);
@@ -55,9 +54,9 @@ public class TagController {
      * @return the response entity
      * @throws ServiceException the service exception
      */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable(name = "id") Long id) throws ServiceException {
-        long result = tagService.delete(id);
-        return result != -1L ? ResponseEntity.ok("Delete successful!") : ResponseEntity.ok("Delete unsuccessful!");
+    @DeleteMapping("/tag/{id}")
+    public ResponseEntity<String> delete(@PathVariable(name = "id") Long id) throws ServiceException, NotExistEntityException {
+        tagService.delete(id);
+        return ResponseEntity.ok("Delete successful!");
     }
 }

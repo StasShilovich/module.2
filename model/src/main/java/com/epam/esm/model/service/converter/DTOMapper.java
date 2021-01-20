@@ -1,6 +1,6 @@
 package com.epam.esm.model.service.converter;
 
-public interface Converter<T, K> {
+public interface DTOMapper<T, K> {
 
     T toDTO(K k);
 

@@ -1,11 +1,18 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.model.dao.entity.SortType;
+import com.epam.esm.model.dao.exception.NotExistEntityException;
 import com.epam.esm.model.service.GiftCertificateService;
 import com.epam.esm.model.service.dto.CertificateDTO;
 import com.epam.esm.model.service.exception.ServiceException;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -13,7 +20,6 @@ import java.util.List;
  * Gift certificate RestAPI.
  */
 @RestController
-@RequestMapping("/certificate")
 public class GiftCertificateController {
 
     private final GiftCertificateService certificateService;
@@ -29,7 +35,7 @@ public class GiftCertificateController {
      * @return the response entity
      * @throws ServiceException the service exception
      */
-    @GetMapping("/{id}")
+    @GetMapping("/certificate/{id}")
     public ResponseEntity<CertificateDTO> find(@PathVariable(name = "id") Long id) throws ServiceException {
         CertificateDTO certificateDTO = certificateService.find(id);
         return ResponseEntity.ok(certificateDTO);
@@ -42,7 +48,7 @@ public class GiftCertificateController {
      * @return the response entity
      * @throws ServiceException the service exception
      */
-    @PostMapping(value = "/")
+    @PostMapping(value = "/certificate")
     public ResponseEntity<CertificateDTO> add(@RequestBody CertificateDTO certificateDTO) throws ServiceException {
         CertificateDTO result = certificateService.add(certificateDTO);
         return ResponseEntity.ok(result);
@@ -55,7 +61,7 @@ public class GiftCertificateController {
      * @return the response entity
      * @throws ServiceException the service exception
      */
-    @PutMapping(value = "/", consumes = "application/json")
+    @PutMapping(value = "/certificate", consumes = "application/json")
     public ResponseEntity<CertificateDTO> update(@RequestBody CertificateDTO certificateDTO) throws ServiceException {
         CertificateDTO result = certificateService.update(certificateDTO);
         return ResponseEntity.ok(result);
@@ -68,10 +74,10 @@ public class GiftCertificateController {
      * @return the response entity
      * @throws ServiceException the service exception
      */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable(name = "id") Long id) throws ServiceException {
-        long result = certificateService.delete(id);
-        return result != -1L ? ResponseEntity.ok("Delete successful!") : ResponseEntity.ok("Delete unsuccessful!");
+    @DeleteMapping("/certificate/{id}")
+    public ResponseEntity<String> delete(@PathVariable(name = "id") Long id) throws ServiceException, NotExistEntityException {
+        certificateService.delete(id);
+        return ResponseEntity.ok("Delete successful!");
     }
 
     /**
@@ -81,8 +87,8 @@ public class GiftCertificateController {
      * @return the response entity
      * @throws ServiceException the service exception
      */
-    @GetMapping("/byName/{name}")
-    public ResponseEntity<List<CertificateDTO>> findByTag(@PathVariable(name = "name") String tagName)
+    @GetMapping("/certificates/search/{tag-name}")
+    public ResponseEntity<List<CertificateDTO>> findByTag(@PathVariable(name = "tag-name") String tagName)
             throws ServiceException {
         List<CertificateDTO> certificates = certificateService.findByTag(tagName);
         return ResponseEntity.ok(certificates);
@@ -95,7 +101,7 @@ public class GiftCertificateController {
      * @return the response entity
      * @throws ServiceException the service exception
      */
-    @GetMapping("/byPart/{part}")
+    @GetMapping("/certificates/search/{part}")
     public ResponseEntity<List<CertificateDTO>> searchByNameOrDesc(@PathVariable(name = "part") String part)
             throws ServiceException {
         List<CertificateDTO> certificates = certificateService.searchByNameOrDesc(part);
@@ -108,7 +114,7 @@ public class GiftCertificateController {
      * @return the response entity
      * @throws ServiceException the service exception
      */
-    @GetMapping("/sortByName{sort}")
+    @GetMapping("/certificates/sort/name/{sort}")
     public ResponseEntity<List<CertificateDTO>> sortByName(@PathVariable(name = "sort") SortType sortType) throws ServiceException {
         List<CertificateDTO> certificates = certificateService.sortByName(sortType);
         return ResponseEntity.ok(certificates);
@@ -120,7 +126,7 @@ public class GiftCertificateController {
      * @return the response entity
      * @throws ServiceException the service exception
      */
-    @GetMapping("/sortByDate{sort}")
+    @GetMapping("/certificates/sort/date/{sort}")
     public ResponseEntity<List<CertificateDTO>> sortByDate(@PathVariable(name = "sort") SortType sortType) throws ServiceException {
         List<CertificateDTO> certificates = certificateService.sortByDate(sortType);
         return ResponseEntity.ok(certificates);

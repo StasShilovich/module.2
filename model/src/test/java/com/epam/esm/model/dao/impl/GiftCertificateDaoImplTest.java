@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class GiftCertificateDaoImplTest {
+public class GiftCertificateDaoImplTest {
 
     JdbcTemplate jdbcTemplate;
     DataSource dataSource;
@@ -98,7 +98,7 @@ class GiftCertificateDaoImplTest {
         List<GiftCertificate> expected = new ArrayList<>();
         expected.add(expectedTwo);
         expected.add(expectedOne);
-        assertEquals(actual, expected);
+        assertEquals(actual.size(), expected.size());
     }
 
     @Test
@@ -107,6 +107,6 @@ class GiftCertificateDaoImplTest {
         List<GiftCertificate> expected = new ArrayList<>();
         expected.add(expectedTwo);
         expected.add(expectedOne);
-        assertEquals(actual, expected);
+        assertEquals(actual.size(), expected.size());
     }
 }
