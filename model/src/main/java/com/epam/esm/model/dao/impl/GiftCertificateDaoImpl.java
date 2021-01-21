@@ -7,6 +7,7 @@ import com.epam.esm.model.dao.exception.DaoException;
 import com.epam.esm.model.dao.mapper.GiftCertificateMapper;
 import com.epam.esm.model.service.dto.CertificateDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -14,10 +15,11 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Repository
 public class GiftCertificateDaoImpl implements GiftCertificateDao {
@@ -26,24 +28,14 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
     private final static String PERCENT = "%";
     private final static String READ_GIFT_CERTIFICATE_SQL =
             "SELECT id,name,description,price,duration,create_date,last_update_date FROM gift_certificate WHERE id=?";
-    private final static String CREATE_GIFT_CERTIFICATE_SQL =
-            "INSERT INTO gift_certificate(name,description,price,duration,create_date,last_update_date)" +
-                    " VALUES (?,?,?,?,?,?)";
     private final static String DELETE_GIFT_CERTIFICATE_SQL = "DELETE FROM gift_certificate WHERE ID=?";
-    private final static String SELECT_GIFT_CERTIFICATE_BY_TAG_SQL =
-            "SELECT c.id,c.name,c.description,c.price,c.duration,c.create_date,c.last_update_date " +
-                    "from gift_certificate c inner join tag_certificate tc on c.id=tc.id_certificate " +
-                    "inner join tag t on tc.id_tag=t.id WHERE t.name=?";
-    private final static String SELECT_BY_NAME_OR_DESC = "SELECT id,name,description,price,duration,create_date," +
-            "last_update_date FROM gift_certificate WHERE name OR description LIKE ?";
-    private final static String SORT_BY_NAME_SQL =
-            "SELECT id,name,description,price,duration,create_date,last_update_date" +
-                    " FROM gift_certificate ORDER BY name ";
-    private final static String SORT_BY_DATE_SQL =
-            "SELECT id,name,description,price,duration,create_date,last_update_date " +
-                    "FROM gift_certificate ORDER BY create_date ";
     private final static String UPDATE_FIRST_PART_SQL = "UPDATE gift_certificate SET ";
     private final static String UPDATE_SECOND_PART_SQL = " WHERE id=?";
+    private final static String FILTER_BY_PARAMETER_SQL =
+            "SELECT c.id,c.name,c.description,c.price,c.duration,c.create_date,c.last_update_date " +
+                    "from gift_certificate c inner join tag_certificate tc on c.id=tc.id_certificate " +
+                    "inner join tag t on tc.id_tag=t.id ";
+
 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert jdbcInsert;
@@ -137,60 +129,45 @@ public class GiftCertificateDaoImpl implements GiftCertificateDao {
     }
 
     @Override
-    public List<GiftCertificate> findByTag(String tag) throws DaoException {
+    public List<GiftCertificate> filterByParameters(String tag, String part, String sortBy, SortType type) throws DaoException {
         try {
-            List<GiftCertificate> certificates =
-                    jdbcTemplate.query(SELECT_GIFT_CERTIFICATE_BY_TAG_SQL, new Object[]{tag},
-                            new GiftCertificateMapper());
+            String sql = buildSelectSQL(tag, part, sortBy, type);
+            String likePartExpression = isNotEmpty(part) ? PERCENT + part + PERCENT : part;
+            Object[] objects = Stream.of(tag, likePartExpression)
+                    .filter(StringUtils::isNotEmpty)
+                    .toArray();
+            List<GiftCertificate> certificates = jdbcTemplate.query(sql, objects, new GiftCertificateMapper());
             return certificates;
         } catch (DataAccessException e) {
-            logger.error("Find by tag exception", e);
-            throw new DaoException("Find by tag exception", e);
+            logger.error("Filter by parameter exception", e);
+            throw new DaoException("Filter by parameter exception", e);
         }
     }
 
-    @Override
-    public List<GiftCertificate> searchByNameOrDesc(String part) throws DaoException {
-        try {
-            String sqlPart = PERCENT + part + PERCENT;
-            List<GiftCertificate> certificates =
-                    jdbcTemplate.query(SELECT_BY_NAME_OR_DESC, new Object[]{sqlPart}, new GiftCertificateMapper());
-            return certificates;
-        } catch (DataAccessException e) {
-            logger.error("Search by name or description exception", e);
-            throw new DaoException("Search by name or description exception", e);
-        }
-    }
-
-    @Override
-    public List<GiftCertificate> sortByDate(SortType sortType) throws DaoException {
-        try {
-            StringBuilder builder = new StringBuilder(SORT_BY_DATE_SQL);
-            if (sortType == SortType.DESC) {
-                builder.append(SortType.DESC);
+    private String buildSelectSQL(String tag, String part, String sortBy, SortType type) {
+        StringBuilder builder = new StringBuilder(FILTER_BY_PARAMETER_SQL);
+        if (isNotEmpty(tag) || isNotEmpty(part)) {
+            builder.append("WHERE ");
+            if (isNotEmpty(tag) && isNotEmpty(part)) {
+                builder.append("t.name=? AND (c.name OR c.description LIKE ?) ");
+            } else if (isNotEmpty(tag)) {
+                builder.append("t.name=? ");
+            } else {
+                builder.append("c.name OR c.description LIKE ? ");
             }
-            List<GiftCertificate> certificates =
-                    jdbcTemplate.query(builder.toString(), new GiftCertificateMapper());
-            return certificates;
-        } catch (DataAccessException e) {
-            logger.error("Sort by date exception", e);
-            throw new DaoException("Sort by date exception", e);
         }
-    }
-
-    @Override
-    public List<GiftCertificate> sortByName(SortType sortType) throws DaoException {
-        try {
-            StringBuilder builder = new StringBuilder(SORT_BY_NAME_SQL);
-            if (sortType == SortType.DESC) {
-                builder.append(SortType.DESC);
+        builder.append("GROUP BY c.id ");
+        if (isNotEmpty(sortBy) || type != null) {
+            builder.append("ORDER BY ");
+            if (isNotEmpty(sortBy) && sortBy.equalsIgnoreCase("date")) {
+                builder.append("c.create_date ");
+            } else {
+                builder.append("c.name ");
             }
-            List<GiftCertificate> certificates =
-                    jdbcTemplate.query(builder.toString(), new GiftCertificateMapper());
-            return certificates;
-        } catch (DataAccessException e) {
-            logger.error("Sort by name exception", e);
-            throw new DaoException("Sort by name exception", e);
+            if (type != null) {
+                builder.append(type);
+            }
         }
+        return builder.toString();
     }
 }

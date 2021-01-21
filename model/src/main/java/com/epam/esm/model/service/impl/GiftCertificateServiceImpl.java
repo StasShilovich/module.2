@@ -84,42 +84,14 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
-    public List<CertificateDTO> searchByParameter(String tagName, String part) throws ServiceException, UnsupportedOperationException {
+    public List<CertificateDTO> filterByParameters(String tag, String part, String sortBy, SortType type)
+            throws ServiceException {
         try {
-            if (tagName != null && part != null || tagName == null && part == null) {
-                throw new UnsupportedOperationException("Not supported yet!");
-            }
-            List<GiftCertificate> result;
-            if (tagName == null) {
-                result = certificateDao.searchByNameOrDesc(part);
-            } else {
-                result = certificateDao.findByTag(tagName);
-            }
-            return result.stream().map(dtoMapper::toDTO).collect(Collectors.toList());
-        } catch (DaoException e) {
-            logger.error("Search by parameter exception", e);
-            throw new ServiceException("Search by parameter exception", e);
-        }
-    }
-
-    @Override
-    public List<CertificateDTO> sortByParameter(String parameter, SortType sortType) throws ServiceException, UnsupportedOperationException {
-        try {
-            List<GiftCertificate> certificates;
-            if (sortType == null) {
-                sortType = SortType.ASC;
-            }
-            if (parameter != null && parameter.equals("name")) {
-                certificates = certificateDao.sortByName(sortType);
-            } else if (parameter != null && parameter.equals("date")) {
-                certificates = certificateDao.sortByDate(sortType);
-            } else {
-                certificates = certificateDao.sortByName(sortType);
-            }
+            List<GiftCertificate> certificates = certificateDao.filterByParameters(tag, part, sortBy, type);
             return certificates.stream().map(dtoMapper::toDTO).collect(Collectors.toList());
         } catch (DaoException e) {
-            logger.error("Sort by parameter exception", e);
-            throw new ServiceException("Sort by parameter exception", e);
+            logger.error("Filter by parameters exception", e);
+            throw new ServiceException("Filter by parameters exception", e);
         }
     }
 }

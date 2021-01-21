@@ -40,6 +40,7 @@ public class GiftCertificateServiceImplTest {
     GiftCertificateService service;
     GiftCertificate certificate;
     CertificateDTO certificateDTO;
+    List<GiftCertificate> certificates;
 
     @BeforeEach
     public void setUp() {
@@ -49,6 +50,8 @@ public class GiftCertificateServiceImplTest {
                 5, LocalDateTime.parse("2021-01-14T13:10:00"), LocalDateTime.parse("2022-01-14T13:10:00"));
         certificateDTO = new CertificateDTO(1L, "name", "description", new BigDecimal("20"),
                 5, "2021-01-14T13:10:00.0", "2022-01-14T13:10:00.0");
+        certificates = new ArrayList<>();
+        certificates.add(certificate);
     }
 
     @Test
@@ -103,7 +106,7 @@ public class GiftCertificateServiceImplTest {
     @Test
     void testUpdateNegative() throws DaoException, ServiceException {
         lenient().when(dao.update(any(CertificateDTO.class))).thenReturn(1L);
-        lenient().when((dao.read(anyLong()))).thenReturn(certificate);
+        lenient().when(dao.read(anyLong())).thenReturn(certificate);
         CertificateDTO actual = service.update(certificateDTO);
         assertNotEquals(actual, new CertificateDTO());
     }
@@ -118,5 +121,30 @@ public class GiftCertificateServiceImplTest {
     void testDeleteException() throws DaoException {
         lenient().when(dao.delete(anyLong())).thenThrow(DaoException.class);
         assertThrows(ServiceException.class, () -> service.delete(1L));
+    }
+
+    @Test
+    void testFilterByParametersPositive() throws DaoException, ServiceException {
+        lenient().when(dao.filterByParameters(anyString(), anyString(), anyString(), any()))
+                .thenReturn(certificates);
+        List<CertificateDTO> actual = service.filterByParameters("", "", "", null);
+        List<CertificateDTO> expected = new ArrayList<>();
+        expected.add(certificateDTO);
+        assertEquals(actual, expected);
+    }
+
+    @Test
+    void testFilterByParametersNegative() throws DaoException, ServiceException {
+        lenient().when(dao.filterByParameters(anyString(), anyString(), anyString(), any()))
+                .thenReturn(certificates);
+        List<CertificateDTO> actual = service.filterByParameters("", "", "", null);
+        assertNotEquals(actual, new ArrayList<>());
+    }
+
+    @Test
+    void testFilterByParametersException() throws DaoException {
+        lenient().when(dao.filterByParameters(anyString(), anyString(), anyString(), any()))
+                .thenThrow(DaoException.class);
+        assertThrows(ServiceException.class, () -> service.filterByParameters("", "", "", null));
     }
 }

@@ -37,6 +37,10 @@ public class GiftCertificateDaoImplTest {
                 .generateUniqueName(true)
                 .addScript("classpath:certificate-schema.sql")
                 .addScript("classpath:certificate-test-data.sql")
+                .addScript("classpath:tag-schema.sql")
+                .addScript("classpath:tag-test-data.sql")
+                .addScript("classpath:tag-certificate-schema.sql")
+                .addScript("classpath:tag-certificate-test-data.sql")
                 .build();
         jdbcTemplate = new JdbcTemplate(dataSource);
         certificateDao = new GiftCertificateDaoImpl(jdbcTemplate);
@@ -93,20 +97,62 @@ public class GiftCertificateDaoImplTest {
     }
 
     @Test
-    void testSortByDatePositive() throws DaoException {
-        List<GiftCertificate> actual = certificateDao.sortByDate(SortType.ASC);
+    void testFilterByParametersPositive() throws DaoException {
+        List<GiftCertificate> actual = certificateDao.filterByParameters("", "", "", null);
         List<GiftCertificate> expected = new ArrayList<>();
-        expected.add(expectedTwo);
         expected.add(expectedOne);
-        assertEquals(actual.size(), expected.size());
+        expected.add(expectedTwo);
+        assertEquals(actual, expected);
     }
 
     @Test
-    void testSortByNamePositive() throws DaoException {
-        List<GiftCertificate> actual = certificateDao.sortByName(SortType.ASC);
+    void testFilterByParametersNegative() throws DaoException {
+        List<GiftCertificate> actual = certificateDao.filterByParameters("", "", "", null);
+        assertNotEquals(actual, new ArrayList<>());
+    }
+
+    @Test
+    void testFilterByParameterTag() throws DaoException {
+        List<GiftCertificate> actual = certificateDao.filterByParameters("sport", "", "", null);
+        List<GiftCertificate> expected = new ArrayList<>();
+        expected.add(expectedOne);
+        assertEquals(actual, expected);
+    }
+
+
+    @Test
+    void testFilterByParameterSortByName() throws DaoException {
+        List<GiftCertificate> actual = certificateDao.filterByParameters("", "", "name", null);
         List<GiftCertificate> expected = new ArrayList<>();
         expected.add(expectedTwo);
         expected.add(expectedOne);
-        assertEquals(actual.size(), expected.size());
+        assertEquals(actual, expected);
+    }
+
+    @Test
+    void testFilterByParameterSortByDate() throws DaoException {
+        List<GiftCertificate> actual = certificateDao.filterByParameters("", "", "date", null);
+        List<GiftCertificate> expected = new ArrayList<>();
+        expected.add(expectedTwo);
+        expected.add(expectedOne);
+        assertEquals(actual, expected);
+    }
+
+    @Test
+    void testFilterByParameterSortType() throws DaoException {
+        List<GiftCertificate> actual = certificateDao.filterByParameters("", "", "", SortType.DESC);
+        List<GiftCertificate> expected = new ArrayList<>();
+        expected.add(expectedOne);
+        expected.add(expectedTwo);
+        assertEquals(actual, expected);
+    }
+
+    @Test
+    void testFilterByParameterSortByAndType() throws DaoException {
+        List<GiftCertificate> actual = certificateDao.filterByParameters("", "", "date", SortType.DESC);
+        List<GiftCertificate> expected = new ArrayList<>();
+        expected.add(expectedOne);
+        expected.add(expectedTwo);
+        assertEquals(actual, expected);
     }
 }

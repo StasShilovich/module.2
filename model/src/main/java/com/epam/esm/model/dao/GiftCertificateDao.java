@@ -17,11 +17,6 @@ public interface GiftCertificateDao {
 
     long delete(Long id) throws DaoException;
 
-    List<GiftCertificate> findByTag(String tag) throws DaoException;
-
-    List<GiftCertificate> searchByNameOrDesc(String part) throws DaoException;
-
-    List<GiftCertificate> sortByDate(SortType sortType) throws DaoException;
-
-    List<GiftCertificate> sortByName(SortType sortType) throws DaoException;
+    List<GiftCertificate> filterByParameters(String tag, String part, String sortBy, SortType type)
+            throws DaoException;
 }

@@ -6,13 +6,7 @@ import com.epam.esm.model.service.GiftCertificateService;
 import com.epam.esm.model.service.dto.CertificateDTO;
 import com.epam.esm.model.service.exception.ServiceException;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.ws.rs.QueryParam;
 import java.util.List;
@@ -83,34 +77,23 @@ public class GiftCertificateController {
     }
 
     /**
-     * Search by tag name or description part
+     * Filter gift certificates by parameters
      *
-     * @param tagName
+     * @param tag
      * @param part
-     * @return
-     * @throws ServiceException
-     */
-    @GetMapping("/certificates/search")
-    public ResponseEntity<List<CertificateDTO>> searchByParameter
-    (@QueryParam("tagName") String tagName, @QueryParam("part") String part)
-            throws ServiceException {
-        List<CertificateDTO> certificates = certificateService.searchByParameter(tagName, part);
-        return ResponseEntity.ok(certificates);
-    }
-
-    /**
-     * Sort by date or name ASC/DESC
-     *
-     * @param by
+     * @param sortBy
      * @param type
      * @return
      * @throws ServiceException
      */
-    @GetMapping("/certificates/sort")
-    public ResponseEntity<List<CertificateDTO>> sortByParameter
-    (@QueryParam("by") String by, @QueryParam("type") SortType type)
+    @GetMapping("/certificates")
+    public ResponseEntity<List<CertificateDTO>> filterByParameter(
+            @RequestParam(value = "tag", required = false) String tag,
+            @RequestParam(value = "part", required = false) String part,
+            @RequestParam(value = "sort_by", required = false) String sortBy,
+            @RequestParam(value = "type", required = false) SortType type)
             throws ServiceException {
-        List<CertificateDTO> certificates = certificateService.sortByParameter(by, type);
+        List<CertificateDTO> certificates = certificateService.filterByParameters(tag, part, sortBy, type);
         return ResponseEntity.ok(certificates);
     }
 }

@@ -17,9 +17,6 @@ public interface GiftCertificateService {
 
     void delete(Long id) throws ServiceException, NotExistEntityException;
 
-    List<CertificateDTO> searchByParameter(String tagName, String part)
-            throws ServiceException, UnsupportedOperationException;
-
-    List<CertificateDTO> sortByParameter(String parameter, SortType sortType)
-            throws ServiceException, UnsupportedOperationException;
+    List<CertificateDTO> filterByParameters(String tag, String part, String sortBy, SortType type)
+            throws ServiceException;
 }
