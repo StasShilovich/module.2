@@ -1,0 +1,13 @@
+  
+out/*
+lib/*
+target/*
+*/target/*
+*/target/**
+.idea/
+*.iws
+*.iml
+*.ipr
+**/build/
+!src/**/build/
+.idea
