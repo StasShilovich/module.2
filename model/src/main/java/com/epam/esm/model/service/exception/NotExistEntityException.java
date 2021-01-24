@@ -1,4 +1,4 @@
-package com.epam.esm.model.dao.exception;
+package com.epam.esm.model.service.exception;
 
 public class NotExistEntityException extends Exception {
 

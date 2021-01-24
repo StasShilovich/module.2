@@ -6,6 +6,7 @@ import com.epam.esm.model.dao.exception.DaoException;
 import com.epam.esm.model.service.TagService;
 import com.epam.esm.model.service.converter.impl.TagDTOMapper;
 import com.epam.esm.model.service.dto.TagDTO;
+import com.epam.esm.model.service.exception.NotExistEntityException;
 import com.epam.esm.model.service.exception.ServiceException;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +16,10 @@ import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -44,48 +49,80 @@ public class TagServiceImplTest {
 
     @Test
     void testFindTagPositive() throws ServiceException, DaoException {
-        lenient().when(tagDao.read(anyLong())).thenReturn(correctTag);
+        lenient().when(tagDao.read(anyLong())).thenReturn(Optional.of(correctTag));
         TagDTO actual = tagService.find(1L);
-        assertEquals(actual, correctTagDTO);
+        assertEquals(correctTagDTO, actual);
     }
 
     @Test
     void testFindTagNegative() throws ServiceException, DaoException {
-        lenient().when(tagDao.read(anyLong())).thenReturn(correctTag);
+        lenient().when(tagDao.read(anyLong())).thenReturn(Optional.of(correctTag));
         TagDTO actual = tagService.find(1L);
         TagDTO expected = new TagDTO(1L, "names");
-        assertNotEquals(actual, expected);
+        assertNotEquals(expected, actual);
     }
 
     @Test
-    void testFindTagException() throws DaoException {
+    void testFindTagServiceException() throws DaoException {
         lenient().when(tagDao.read(anyLong())).thenThrow(DaoException.class);
         assertThrows(ServiceException.class, () -> tagService.find(1L));
     }
 
     @Test
     void testAddPositive() throws ServiceException, DaoException {
-        lenient().when(tagDao.create(any(Tag.class))).thenReturn(correctTag);
+        lenient().when(tagDao.create(any(Tag.class))).thenReturn(Optional.of(correctTag));
         TagDTO actual = tagService.add(correctTagDTO);
-        assertEquals(actual, correctTagDTO);
+        assertEquals(correctTagDTO, actual);
     }
 
     @Test
     void testAddNegative() throws DaoException, ServiceException {
-        lenient().when(tagDao.create(any(Tag.class))).thenReturn(correctTag);
+        lenient().when(tagDao.create(any(Tag.class))).thenReturn(Optional.of(correctTag));
         TagDTO actual = tagService.add(correctTagDTO);
-        assertNotEquals(actual, new TagDTO());
+        assertNotEquals(new TagDTO(), actual);
     }
 
     @Test
-    void testAddException() throws DaoException {
+    void testAddServiceException() throws DaoException {
         lenient().when(tagDao.create(any(Tag.class))).thenThrow(DaoException.class);
         assertThrows(ServiceException.class, () -> tagService.add(correctTagDTO));
     }
 
     @Test
-    void testDeleteException() throws DaoException {
+    void testDeleteServiceException() throws DaoException {
         lenient().when(tagDao.delete(anyLong())).thenThrow(DaoException.class);
         assertThrows(ServiceException.class, () -> tagService.delete(1L));
+    }
+
+    @Test
+    void testDeleteNotExistEntityException() throws DaoException {
+        lenient().when(tagDao.delete(anyLong())).thenReturn(Optional.empty());
+        assertThrows(NotExistEntityException.class, () -> tagService.delete(1L));
+    }
+
+    @Test
+    void testFindAllPositive() throws DaoException, ServiceException {
+        List<Tag> tags = new ArrayList<>();
+        tags.add(correctTag);
+        lenient().when(tagDao.findAll()).thenReturn(Optional.of(tags));
+        List<TagDTO> actual = tagService.findAll();
+        List<TagDTO> expected = new ArrayList<>();
+        expected.add(correctTagDTO);
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    void testFindAllNegative() throws DaoException, ServiceException {
+        List<Tag> tags = new ArrayList<>();
+        tags.add(correctTag);
+        lenient().when(tagDao.findAll()).thenReturn(Optional.of(tags));
+        List<TagDTO> actual = tagService.findAll();
+        assertNotEquals(new ArrayList<>().size(), actual.size());
+    }
+
+    @Test
+    void testFindAllException() throws DaoException {
+        lenient().when(tagDao.findAll()).thenThrow(DaoException.class);
+        assertThrows(ServiceException.class, () -> tagService.findAll());
     }
 }

@@ -1,10 +1,10 @@
 package com.epam.esm.model.dao.impl;
 
 import com.epam.esm.model.dao.GiftCertificateDao;
+import com.epam.esm.model.dao.TagDao;
 import com.epam.esm.model.dao.entity.GiftCertificate;
 import com.epam.esm.model.dao.entity.SortType;
 import com.epam.esm.model.dao.exception.DaoException;
-import com.epam.esm.model.service.dto.CertificateDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -26,6 +27,7 @@ public class GiftCertificateDaoImplTest {
 
     JdbcTemplate jdbcTemplate;
     DataSource dataSource;
+    TagDao tagDao;
     GiftCertificateDao certificateDao;
     GiftCertificate certificate;
     GiftCertificate expectedTwo;
@@ -43,21 +45,22 @@ public class GiftCertificateDaoImplTest {
                 .addScript("classpath:tag-certificate-test-data.sql")
                 .build();
         jdbcTemplate = new JdbcTemplate(dataSource);
-        certificateDao = new GiftCertificateDaoImpl(jdbcTemplate);
+        tagDao = new TagDaoImpl(jdbcTemplate);
+        certificateDao = new GiftCertificateDaoImpl(jdbcTemplate, tagDao);
         certificate = new GiftCertificate(null, "name", "description", new BigDecimal("20"),
-                5, LocalDateTime.parse("2021-01-14T13:10:00"), LocalDateTime.parse("2022-01-14T13:10:00"));
+                5, LocalDateTime.parse("2021-01-14T13:10:00"), LocalDateTime.parse("2022-01-14T13:10:00"), null);
         expectedTwo = new GiftCertificate(2L, "Christmas Gift",
                 "Entitle a discount of 50$ on purchasing gift item", new BigDecimal("15.00"), 10,
-                LocalDateTime.parse("2020-12-20T10:15:00"), LocalDateTime.parse("2021-01-05T18:25:00"));
+                LocalDateTime.parse("2020-12-20T10:15:00"), LocalDateTime.parse("2021-01-05T18:25:00"), null);
         expectedOne = new GiftCertificate(1L, "Group meditation session",
                 "Include 30 minute guided meditation and empower hour", new BigDecimal("10.00"), 2,
-                LocalDateTime.parse("2021-01-12T15:15:00"), LocalDateTime.parse("2021-01-14T13:10:00"));
+                LocalDateTime.parse("2021-01-12T15:15:00"), LocalDateTime.parse("2021-01-14T13:10:00"), null);
     }
 
     @Test
     void testCreatePositive() throws DaoException {
-        GiftCertificate actual = certificateDao.create(this.certificate);
-        assertEquals(actual, certificate);
+        Optional<GiftCertificate> actual = certificateDao.create(certificate);
+        assertEquals(Optional.of(certificate), actual);
     }
 
     @Test
@@ -67,14 +70,14 @@ public class GiftCertificateDaoImplTest {
 
     @Test
     void testReadPositive() throws DaoException {
-        GiftCertificate actual = certificateDao.read(2L);
-        assertEquals(actual, expectedTwo);
+        Optional<GiftCertificate> actual = certificateDao.read(2L);
+        assertEquals(Optional.of(expectedTwo), actual);
     }
 
     @Test
     void testReadNegative() throws DaoException {
-        GiftCertificate actual = certificateDao.read(2L);
-        assertNotEquals(actual, certificate);
+        Optional<GiftCertificate> actual = certificateDao.read(2L);
+        assertNotEquals(Optional.of(certificate), actual);
     }
 
     @Test
@@ -83,76 +86,62 @@ public class GiftCertificateDaoImplTest {
     }
 
     @Test
-    void testUpdatePositive() throws DaoException {
-        CertificateDTO certificateDTO = new CertificateDTO(1L, "Group meditation", null, null,
-                null, null, null);
-        long actual = certificateDao.update(certificateDTO);
-        assertEquals(actual, 1L);
-    }
-
-    @Test
-    void testDeletePositive() throws DaoException {
-        long actual = certificateDao.delete(2L);
-        assertEquals(actual, 2L);
-    }
-
-    @Test
     void testFilterByParametersPositive() throws DaoException {
-        List<GiftCertificate> actual = certificateDao.filterByParameters("", "", "", null);
+        Optional<List<GiftCertificate>> actual = certificateDao.filterByParameters("", "", "", null);
         List<GiftCertificate> expected = new ArrayList<>();
         expected.add(expectedOne);
         expected.add(expectedTwo);
-        assertEquals(actual, expected);
+        assertEquals(Optional.of(expected), actual);
     }
 
     @Test
     void testFilterByParametersNegative() throws DaoException {
-        List<GiftCertificate> actual = certificateDao.filterByParameters("", "", "", null);
-        assertNotEquals(actual, new ArrayList<>());
+        Optional<List<GiftCertificate>> actual = certificateDao.filterByParameters("", "", "", null);
+        assertNotEquals(new ArrayList<>(), actual);
     }
 
     @Test
     void testFilterByParameterTag() throws DaoException {
-        List<GiftCertificate> actual = certificateDao.filterByParameters("sport", "", "", null);
+        Optional<List<GiftCertificate>> actual = certificateDao.filterByParameters("sport", "", "", null);
         List<GiftCertificate> expected = new ArrayList<>();
         expected.add(expectedOne);
-        assertEquals(actual, expected);
+        assertEquals(Optional.of(expected), actual);
     }
 
 
     @Test
     void testFilterByParameterSortByName() throws DaoException {
-        List<GiftCertificate> actual = certificateDao.filterByParameters("", "", "name", null);
+        Optional<List<GiftCertificate>> actual = certificateDao.filterByParameters("", "", "name", null);
         List<GiftCertificate> expected = new ArrayList<>();
         expected.add(expectedTwo);
         expected.add(expectedOne);
-        assertEquals(actual, expected);
+        assertEquals(Optional.of(expected), actual);
     }
 
     @Test
     void testFilterByParameterSortByDate() throws DaoException {
-        List<GiftCertificate> actual = certificateDao.filterByParameters("", "", "date", null);
+        Optional<List<GiftCertificate>> actual = certificateDao.filterByParameters("", "", "date", null);
         List<GiftCertificate> expected = new ArrayList<>();
         expected.add(expectedTwo);
         expected.add(expectedOne);
-        assertEquals(actual, expected);
+        assertEquals(Optional.of(expected), actual);
     }
 
     @Test
     void testFilterByParameterSortType() throws DaoException {
-        List<GiftCertificate> actual = certificateDao.filterByParameters("", "", "", SortType.DESC);
+        Optional<List<GiftCertificate>> actual = certificateDao.filterByParameters("", "", "", SortType.DESC);
         List<GiftCertificate> expected = new ArrayList<>();
         expected.add(expectedOne);
         expected.add(expectedTwo);
-        assertEquals(actual, expected);
+        assertEquals(Optional.of(expected), actual);
     }
 
     @Test
     void testFilterByParameterSortByAndType() throws DaoException {
-        List<GiftCertificate> actual = certificateDao.filterByParameters("", "", "date", SortType.DESC);
+        Optional<List<GiftCertificate>> actual = certificateDao.filterByParameters("", "", "date", SortType.DESC);
         List<GiftCertificate> expected = new ArrayList<>();
         expected.add(expectedOne);
         expected.add(expectedTwo);
-        assertEquals(actual, expected);
+        assertEquals(Optional.of(expected), actual);
     }
 }

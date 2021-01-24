@@ -10,17 +10,15 @@ public class TagDTOMapper implements DTOMapper<TagDTO, Tag> {
 
     @Override
     public TagDTO toDTO(Tag tag) {
-        TagDTO tagDTO = new TagDTO();
-        tagDTO.setId(tag.getId());
-        tagDTO.setName(tag.getName());
-        return tagDTO;
+        return TagDTO.builder()
+                .id(tag.getId())
+                .name(tag.getName()).build();
     }
 
     @Override
     public Tag fromDTO(TagDTO tagDTO) {
-        Tag tag = new Tag();
-        tag.setId(tagDTO.getId());
-        tag.setName(tagDTO.getName());
-        return tag;
+        return Tag.builder()
+                .id(tagDTO.getId())
+                .name(tagDTO.getName()).build();
     }
 }

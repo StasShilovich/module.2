@@ -1,6 +1,6 @@
 package com.epam.esm.controller.exception;
 
-import com.epam.esm.model.dao.exception.NotExistEntityException;
+import com.epam.esm.model.service.exception.NotExistEntityException;
 import com.epam.esm.model.service.exception.ServiceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +35,6 @@ public class RestExceptionHandler {
     }
 
     private ErrorResponse buildErrorResponse(HttpStatus status, String message) {
-        return new ErrorResponse(message, status.value() * 100 + atomicInteger.getAndIncrement());
+        return new ErrorResponse(message, status.value() * 100 + atomicInteger.incrementAndGet());
     }
 }

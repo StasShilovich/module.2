@@ -7,5 +7,6 @@ CREATE TABLE gift_certificate
     duration         INT           NOT NULL,
     create_date      TIMESTAMP     NOT NULL,
     last_update_date TIMESTAMP     NOT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    UNIQUE (name)
 );
